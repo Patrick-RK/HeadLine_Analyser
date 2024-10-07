@@ -1,68 +1,90 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+from matplotlib.collections import LineCollection
+import matplotlib.colors as mcolors
 
-def plot_sentiment_analysis(data: list):
-    """
-    Plots the comparison of VADER sentiment scores directly from a list of sentiment analysis results.
 
-    Args:
-        data (list): A list of dictionaries containing sentiment analysis results.
+def plot_moving_averages(df):
     """
-    # Convert list of dictionaries to DataFrame
-    df = pd.DataFrame(data)
+    Plots the moving averages of the VADER sentiment scores along with the raw sentiment line.
     
-    # Create an index for the x-axis representing the position of the headline from the top of the page
-    df['Index'] = range(len(df))
-
-    # Calculate moving averages based on percentages of the length of headlines
-    len_df = len(df)
-    df['VADER_MA_10'] = df['compound'].rolling(window=int(len_df * 0.03)).mean()
-    df['VADER_MA_25'] = df['compound'].rolling(window=int(len_df * 0.10)).mean()
-    df['VADER_MA_33'] = df['compound'].rolling(window=int(len_df * 0.20)).mean()
-
+    Args:
+        df (DataFrame): A DataFrame containing sentiment analysis results and calculated moving averages.
+    """
     # Set a professional plot style using seaborn
     sns.set(style="whitegrid")
 
-    # Define the colors for moving averages and raw sentiment (positive green, negative red)
-    df['color'] = df['compound'].apply(lambda x: 'darkgreen' if x > 0.5 else
-                                                'lightgreen' if x > 0 else
-                                                'lightcoral' if x > -0.5 else 'darkred')
+    # Create a figure for the moving averages
+    plt.figure(figsize=(12, 6))
 
-    # Create a figure for visualizing the comparison
-    plt.figure(figsize=(12, 8))
-
-    # Plot the moving averages (10%, 25%, 33%) and raw VADER sentiment scores
-    plt.subplot(2, 1, 1)
+    # Plot moving averages with clear and distinct styles
+    plt.plot(df['Index'], df['VADER_MA_03'], label='VADER Compound (3% Moving Average)', color='red', linestyle='-', linewidth=2, alpha = 0.3)
+    plt.plot(df['Index'], df['VADER_MA_10'], label='VADER Compound (10% Moving Average)', color='red', linestyle='-', linewidth=2, alpha = 0.6)
     
-    # Plot moving averages with shades of grey
-    plt.plot(df['Index'], df['VADER_MA_10'], label='VADER Compound (10% Moving Average)', color='lightgrey',linestyle=':', linewidth=2)
-    plt.plot(df['Index'], df['VADER_MA_25'], label='VADER Compound (25% Moving Average)', color='darkgrey', linestyle='-',  linewidth=2)
-    plt.plot(df['Index'], df['VADER_MA_33'], label='VADER Compound (33% Moving Average)', color='black', linestyle='--', linewidth=2)
+    # Plot the raw sentiment (scaled compound values)
+    plt.plot(df['Index'], df['scaled_compound'], label='VADER Compound (Raw)', color='blue', linestyle='--', linewidth=2, alpha = 0.75)
 
-    # Plot raw sentiment as a line graph
-    plt.plot(df['Index'], df['compound'], label='VADER Compound (Raw)', color='green', marker='o', alpha=0.6)
-    
-    # Scatter raw sentiment with different colors on top of the line
-    plt.scatter(df['Index'], df['compound'], color=df['color'], label='VADER Compound (Raw)', alpha=0.6)
-
-    plt.title('VADER Compound Moving Averages & Raw Sentiment', fontsize=14, fontweight='bold')
-    plt.xlabel('Headline Position (Index)')
-    plt.ylabel('Sentiment Scores')
-    plt.legend()
+    # Add title, labels, and grid
+    plt.title('VADER Compound: Moving Averages and Raw Sentiment', fontsize=16, fontweight='bold')
+    plt.xlabel('Headline Position (Index)', fontsize=12)
+    plt.ylabel('Sentiment Scores', fontsize=12)
+    plt.legend(fontsize=10)
     plt.grid(True)
 
-    # Plot the raw sentiment with a line graph (second plot)
-    plt.subplot(2, 1, 2)
-    
-    # Line plot for raw sentiment with red for negative and green for positive
-    plt.plot(df['Index'], df['compound'], color='green', marker='o', alpha=0.6, label='VADER Compound Score')
-
-    plt.title('VADER Compound Raw Sentiment Scores', fontsize=14, fontweight='bold')
-    plt.xlabel('Headline Position (Index)')
-    plt.ylabel('Raw Sentiment Scores')
-    plt.grid(True)
-
-    # Show the plots
+    # Show the plot
     plt.tight_layout()
     plt.show()
+
+
+
+# def plot_gradient_sentiment_line(df):
+#     """
+#     Plots a continuous line with gradient coloring based on VADER sentiment scores.
+    
+#     Args:
+#         df (DataFrame): A DataFrame containing sentiment analysis results and scaled compound scores.
+#     """
+#     # Set a professional plot style using seaborn
+#     sns.set(style="whitegrid")
+
+#     # Create a figure for the sentiment line
+#     plt.figure(figsize=(12, 6))
+
+#     # Create a colormap that transitions from red (negative) to green (positive)
+#     cmap = plt.get_cmap('RdYlGn')
+#     norm = plt.Normalize(vmin=-1, vmax=1)
+
+#     # Prepare the data for a gradient line
+#     points = np.array([df['Index'], df['scaled_compound']]).T.reshape(-1, 1, 2)
+#     segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+#     # Create a LineCollection to handle gradient coloring
+#     lc = LineCollection(segments, cmap=cmap, norm=norm)
+#     lc.set_array(df['scaled_compound'])  # Set the color based on sentiment score
+#     lc.set_linewidth(2)
+
+#     # Add the LineCollection to the plot
+#     plt.gca().add_collection(lc)
+
+#     # Plot a color bar for reference
+#     plt.colorbar(lc, label='Sentiment Score')
+
+#     # Ensure the x-axis and y-axis limits match the data range
+#     plt.xlim(df['Index'].min(), df['Index'].max())
+#     plt.ylim(df['scaled_compound'].min() - 0.1, df['scaled_compound'].max() + 0.1)
+
+#     # Scatter plot with color-coded dots for raw sentiment
+#     plt.scatter(df['Index'], df['scaled_compound'], color=[cmap(norm(x)) for x in df['scaled_compound']], s=100, alpha=0.7)
+
+#     # Add title, labels, and grid
+#     plt.title('VADER Compound: Scaled Raw Sentiment Scores (Gradient Line)', fontsize=16, fontweight='bold')
+#     plt.xlabel('Headline Position (Index)', fontsize=12)
+#     plt.ylabel('Scaled Raw Sentiment Scores', fontsize=12)
+#     plt.grid(True)
+
+#     # Show the plot
+#     plt.tight_layout()
+#     plt.show()
