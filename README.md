@@ -1,2 +1,1 @@
-# HeadLine_Analyser
-Scrape news headlines and creates a graph that shows the sentiment plotted against page index
+![alt text](<Screenshot 2024-10-07 at 19.28.42.png>)
