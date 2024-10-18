@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
-def calculate_moving_averages(df, window_percentages=[0.03, 0.10, 0.20]):
+def calculate_moving_averages(df, window_percentages=[0.05, 0.10, 0.20]):
     """
     Calculates scaled moving averages for the sentiment scores based on the provided window percentages.
     

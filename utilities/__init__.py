@@ -1,4 +1,3 @@
-# __init__.py for utilities package
 
 # External libraries
 from selenium import webdriver
@@ -20,5 +19,5 @@ __all__ = [
     'webdriver', 'Service', 'By', 'BeautifulSoup',
     'add_reverse_column', 'fetch_website_with_selenium', 'strip_html',
     'save_data_csv', 'save_sentiment_analysis_to_csv', 'headline_analyser',
-    , 'plot_moving_averages', 'calculate_moving_averages'
+    'plot_moving_averages', 'calculate_moving_averages'
 ]
