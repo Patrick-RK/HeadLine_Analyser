@@ -1,18 +1,15 @@
-from selenium import webdriver
-from time import sleep  # Correct import for sleep
+import requests
 
-# Fetch page using Selenium
-def fetch_website_with_selenium(url):
-    options = webdriver.ChromeOptions()
-    options.add_experimental_option("prefs", {
-        "profile.managed_default_content_settings.javascript": 1
-    })
-    driver = webdriver.Chrome(options=options)
 
-    try:
-        driver.get(url)
-        sleep(5)  # Correct usage of sleep from the time module
-        html_content = driver.page_source
-        return html_content
-    finally:
-        driver.quit()
+def fetch_website(url, timeout=10):
+    """Fetch page HTML using requests."""
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0.0.0 Safari/537.36"
+        )
+    }
+    response = requests.get(url, headers=headers, timeout=timeout)
+    response.raise_for_status()
+    return response.text

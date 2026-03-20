@@ -1,38 +1,40 @@
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
 
-def calculate_moving_averages(df, window_percentages=[0.05, 0.10, 0.20]):
+
+def calculate_moving_averages(df, window_percentages=None):
     """
-    Calculates scaled moving averages for the sentiment scores based on the provided window percentages.
-    
+    Calculates moving averages for compound sentiment scores.
+
+    Uses the raw VADER compound score directly (already in [-1, 1])
+    instead of rescaling with MinMaxScaler, so scores stay comparable
+    across scrape runs.
+
     Args:
-        df (DataFrame or list): The DataFrame containing sentiment analysis results. If a list is passed, it will be converted to a DataFrame.
-        window_percentages (list): List of window sizes as percentages of the data length.
-    
+        df: DataFrame or list of dicts with a 'compound' column.
+        window_percentages: List of window sizes as fractions of data length.
+
     Returns:
-        DataFrame: Updated DataFrame with scaled moving averages columns.
+        DataFrame with scaled_compound and MA columns added.
     """
-    # Convert to DataFrame if it's a list of dictionaries
+    if window_percentages is None:
+        window_percentages = [0.05, 0.10, 0.20]
+
     if isinstance(df, list):
         df = pd.DataFrame(df)
 
-    # Ensure that the 'compound' column exists before scaling
     if 'compound' not in df.columns:
         raise ValueError("'compound' column not found in the DataFrame")
 
-    # Add an 'Index' column for plotting (if it doesn't exist)
     df['Index'] = range(len(df))
 
-    # Apply MinMax scaling to the compound scores
-    scaler = MinMaxScaler(feature_range=(-1, 1))
-    df['scaled_compound'] = scaler.fit_transform(df[['compound']])
+    # Use raw compound directly — it is already [-1, 1]
+    df['scaled_compound'] = df['compound']
 
-    # Calculate the length of the DataFrame
     len_df = len(df)
 
-    # Calculate moving averages for the provided window percentages on the scaled compound values
-    df['VADER_MA_03'] = df['scaled_compound'].rolling(window=int(len_df * window_percentages[0])).mean()
-    df['VADER_MA_10'] = df['scaled_compound'].rolling(window=int(len_df * window_percentages[1])).mean()
-    df['VADER_MA_20'] = df['scaled_compound'].rolling(window=int(len_df * window_percentages[2])).mean()
+    for pct in window_percentages:
+        window = max(1, int(len_df * pct))
+        col_name = f"MA_{int(pct * 100)}pct"
+        df[col_name] = df['scaled_compound'].rolling(window=window).mean()
 
     return df

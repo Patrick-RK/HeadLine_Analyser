@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Headline Analyser{% endblock %}
+
+{% block content %}
+<h1>Headline Sentiment Dashboard</h1>
+
+<div class="scrape-controls">
+    <form method="POST" action="{{ url_for('scrape') }}" class="inline-form">
+        <select name="site">
+            {% for key, site in sites.items() %}
+            <option value="{{ key }}">{{ site.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn">Scrape</button>
+    </form>
+    <form method="POST" action="{{ url_for('scrape_all') }}" class="inline-form">
+        <button type="submit" class="btn btn-secondary">Scrape All Sites</button>
+    </form>
+</div>
+
+{% if run %}
+<p class="run-info">
+    Run #{{ run['id'] }} &mdash; {{ run['scraped_at'] }} &mdash; {{ run['url'] }} &mdash; {{ run['headline_count'] }} headlines
+</p>
+
+<div id="chart"></div>
+<script>
+    fetch("{{ url_for('chart_data', run_id=run['id']) }}")
+        .then(r => r.json())
+        .then(fig => {
+            Plotly.newPlot('chart', fig.data, fig.layout, {responsive: true});
+        });
+</script>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Headline</th>
+            <th>Compound</th>
+            <th>Sentiment</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for h in headlines %}
+        <tr class="{{ h['overall_sentiment']|lower }}">
+            <td>{{ h['position'] }}</td>
+            <td>{{ h['text'] }}</td>
+            <td>{{ "%.3f"|format(h['compound']) }}</td>
+            <td>{{ h['overall_sentiment'] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No scrape data yet. Pick a site and click <strong>Scrape</strong> to get started.</p>
+{% endif %}
+{% endblock %}

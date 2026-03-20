@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}History - Headline Analyser{% endblock %}
+
+{% block content %}
+<h1>Scrape History</h1>
+
+{% if runs %}
+<table>
+    <thead>
+        <tr>
+            <th>Run ID</th>
+            <th>Scraped At</th>
+            <th>Source</th>
+            <th>Headlines</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for run in runs %}
+        <tr>
+            <td>{{ run['id'] }}</td>
+            <td>{{ run['scraped_at'] }}</td>
+            <td>{{ run['url'] }}</td>
+            <td>{{ run['headline_count'] }}</td>
+            <td><a href="{{ url_for('dashboard', run_id=run['id']) }}">View</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No scrape runs yet.</p>
+{% endif %}
+{% endblock %}

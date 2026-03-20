@@ -1,35 +1,47 @@
 from bs4 import BeautifulSoup, Comment
 
-def strip_html(html_content, to_remove_ids=None, to_remove_classes=None, tags_to_extract=None):
-    to_remove_ids = to_remove_ids or []
-    to_remove_classes = to_remove_classes or []
-    tags_to_extract = tags_to_extract or ['h3', 'h5']  
+
+def strip_html(html_content, selector="h3, h5", exclude_classes=None):
+    """
+    Extract headline text from HTML using a CSS selector.
+
+    Args:
+        html_content: Raw HTML string.
+        selector: CSS selector for headline elements (e.g. "h3, h5" or "div.title-redesign").
+        exclude_classes: List of CSS class names to skip.
+
+    Returns:
+        List of headline strings.
+    """
+    exclude_classes = exclude_classes or []
 
     soup = BeautifulSoup(html_content, 'html.parser')
-    
+
     for element in soup(['script', 'style']):
-        element.decompose() 
-    
+        element.decompose()
+
     for comment in soup.find_all(string=lambda text: isinstance(text, Comment)):
         comment.extract()
-    
-    for element_id in to_remove_ids:
-        elem = soup.find(id=element_id)
-        if elem:
-            elem.decompose()  
-    
-    for class_name in to_remove_classes:
-        for elem in soup.find_all(class_=class_name):
-            elem.decompose()
 
-    extracted_elements = soup.find_all(tags_to_extract)
-    
+    extracted_elements = soup.select(selector)
+
     titles = []
     for tag in extracted_elements:
-        # If there's a <span> inside the <h3> or <h5>, get the text from the <span>
-        if tag.find('span'):
-            titles.append(tag.find('span').get_text(strip=True))
-        else:
-            titles.append(tag.get_text(strip=True))
+        # Skip excluded classes
+        tag_classes = tag.get('class', [])
+        if any(cls in tag_classes for cls in exclude_classes):
+            continue
 
-    return titles  # Return the list of titles
+        # If there's a <span> inside, prefer the span text
+        if tag.find('span'):
+            text = tag.find('span').get_text(strip=True)
+        else:
+            text = tag.get_text(strip=True)
+
+        # Skip junk headlines that are too short to be meaningful
+        if len(text.split()) < 4:
+            continue
+
+        titles.append(text)
+
+    return titles

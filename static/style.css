@@ -1,0 +1,107 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+nav {
+    background: #2c3e50;
+    padding: 0.8rem 2rem;
+    display: flex;
+    gap: 1.5rem;
+}
+nav a {
+    color: #ecf0f1;
+    text-decoration: none;
+    font-weight: 500;
+}
+nav a:hover { color: #3498db; }
+
+main {
+    max-width: 960px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+h1 { margin-bottom: 1rem; }
+
+.btn {
+    background: #2980b9;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.4rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+.btn:hover { background: #2471a3; }
+.btn-secondary { background: #7f8c8d; }
+.btn-secondary:hover { background: #6c7a89; }
+
+.scrape-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+.inline-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+select {
+    padding: 0.55rem 0.8rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    background: #fff;
+}
+
+.run-info {
+    color: #666;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+#chart {
+    width: 100%;
+    min-height: 420px;
+    margin-bottom: 2rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+    background: #fff;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+th, td {
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+th { background: #34495e; color: #fff; }
+
+tr.positive td:last-child { color: #27ae60; font-weight: 600; }
+tr.negative td:last-child { color: #c0392b; font-weight: 600; }
+tr.neutral td:last-child  { color: #7f8c8d; font-weight: 600; }
+
+.flashes { margin-bottom: 1rem; }
+.flash {
+    padding: 0.6rem 1rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+.flash.error   { background: #fdecea; color: #c0392b; }
+.flash.success { background: #eafaf1; color: #27ae60; }
+
+a { color: #2980b9; }

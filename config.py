@@ -1,0 +1,33 @@
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(BASE_DIR, "headlines.db")
+
+SITES = {
+    "rte": {
+        "name": "RTÉ News",
+        "url": "https://www.rte.ie/news/",
+        "selector": "h3, h5",
+    },
+    "irishtimes": {
+        "name": "Irish Times",
+        "url": "https://www.irishtimes.com/",
+        "selector": "h3",
+    },
+    "independent": {
+        "name": "Irish Independent",
+        "url": "https://www.independent.ie/",
+        "selector": "h2, h4",
+    },
+    "journal": {
+        "name": "The Journal",
+        "url": "https://www.thejournal.ie/",
+        "selector": "div.title-redesign",
+        "exclude_classes": [
+            "daily-poll-title-redesign",
+            "separator-title-redesign",
+            "spotlight-title-image-container-redesign",
+            "roundup-redesign-title",
+        ],
+    },
+}

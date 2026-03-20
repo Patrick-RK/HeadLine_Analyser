@@ -1,23 +1,14 @@
-
-# External libraries
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 
-# Internal utilities
 from .add_reverse_index import add_reverse_column
-from .fetch_website import fetch_website_with_selenium 
+from .fetch_website import fetch_website
 from .clean_html import strip_html
-from .save_csv_today import save_data_csv
-from .analyse_headlines import save_sentiment_analysis_to_csv, headline_analyser
-from .sentiment_plot import plot_moving_averages
+from .analyse_headlines import headline_analyser
+from .sentiment_plot import build_plotly_figure
 from .moving_averages import calculate_moving_averages
 
-# Optional: Define __all__ for wildcard imports
 __all__ = [
-    'webdriver', 'Service', 'By', 'BeautifulSoup',
-    'add_reverse_column', 'fetch_website_with_selenium', 'strip_html',
-    'save_data_csv', 'save_sentiment_analysis_to_csv', 'headline_analyser',
-    'plot_moving_averages', 'calculate_moving_averages'
+    'BeautifulSoup',
+    'add_reverse_column', 'fetch_website', 'strip_html',
+    'headline_analyser', 'build_plotly_figure', 'calculate_moving_averages',
 ]
