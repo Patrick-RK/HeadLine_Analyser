@@ -1,31 +1,34 @@
 from thefuzz import fuzz
 
+STOP_WORDS = frozenset({
+    "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
+    "of", "with", "by", "from", "as", "is", "was", "are", "were", "be",
+    "been", "being", "have", "has", "had", "do", "does", "did", "will",
+    "would", "could", "should", "may", "might", "shall", "can", "it",
+    "its", "this", "that", "these", "those", "he", "she", "they", "we",
+    "his", "her", "their", "our", "my", "your", "who", "which", "what",
+    "when", "where", "how", "not", "no", "nor", "so", "if", "then",
+    "than", "too", "very", "just", "about", "up", "out", "into", "over",
+    "after", "before", "between", "under", "again", "further", "also",
+    "says", "said", "say", "new", "amid", "set",
+})
+
+
+def _strip_stops(text):
+    return " ".join(w for w in text.lower().split() if w not in STOP_WORDS)
+
 
 def find_cross_site_matches(runs_with_headlines, threshold=60):
     """Find headlines covering the same story across different sites.
 
-    Args:
-        runs_with_headlines: list of dicts, each with keys:
-            - url: the site URL
-            - headlines: list of headline dicts (text, compound, overall_sentiment, ...)
-        threshold: minimum token_sort_ratio to consider a match (0-100)
-
-    Returns:
-        list of match groups, each a dict:
-            {
-                "anchor": headline text used as the group label,
-                "matches": [
-                    {"site": url, "text": str, "compound": float, "sentiment": str},
-                    ...
-                ]
-            }
-        Sorted by number of sites matched (most first), then by avg abs(compound).
+    Compares headlines with stop words removed for better matching,
+    but preserves original text for display and sentiment scoring.
     """
     if len(runs_with_headlines) < 2:
         return []
 
-    # Build flat list with site labels
     all_headlines = []
+    stripped = []
     for run in runs_with_headlines:
         for h in run["headlines"]:
             all_headlines.append({
@@ -34,6 +37,7 @@ def find_cross_site_matches(runs_with_headlines, threshold=60):
                 "compound": h["compound"],
                 "sentiment": h["overall_sentiment"],
             })
+            stripped.append(_strip_stops(h["text"]))
 
     used = set()
     groups = []
@@ -42,36 +46,33 @@ def find_cross_site_matches(runs_with_headlines, threshold=60):
         if i in used:
             continue
 
-        group = [anchor]
+        group_indices = [i]
         used.add(i)
         seen_sites = {anchor["site"]}
 
         for j, candidate in enumerate(all_headlines):
             if j in used or candidate["site"] in seen_sites:
                 continue
-            score = fuzz.token_sort_ratio(anchor["text"], candidate["text"])
+            score = fuzz.token_sort_ratio(stripped[i], stripped[j])
             if score >= threshold:
-                group.append(candidate)
+                group_indices.append(j)
                 used.add(j)
                 seen_sites.add(candidate["site"])
 
-        # Only keep groups that span 2+ sites
-        if len(group) >= 2:
+        if len(group_indices) >= 2:
+            group = [all_headlines[idx] for idx in group_indices]
             compounds = [m["compound"] for m in group]
-            max_deviation = max(abs(c) for c in compounds)
-            spread = max(compounds) - min(compounds)
+            best_score = max(
+                fuzz.token_sort_ratio(stripped[i], stripped[idx])
+                for idx in group_indices[1:]
+            )
             groups.append({
                 "anchor": anchor["text"],
-                "score": max(
-                    fuzz.token_sort_ratio(anchor["text"], m["text"])
-                    for m in group[1:]
-                ),
-                "max_deviation": max_deviation,
-                "spread": spread,
+                "score": best_score,
+                "max_deviation": max(abs(c) for c in compounds),
+                "spread": max(compounds) - min(compounds),
                 "matches": group,
             })
 
-    # Most extreme language first (biggest deviation from neutral),
-    # then biggest spread between sites
     groups.sort(key=lambda g: (-g["max_deviation"], -g["spread"]))
     return groups
