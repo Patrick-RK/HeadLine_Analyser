@@ -20,7 +20,7 @@ def _strip_stops(text):
     return " ".join(w for w in text.lower().split() if w not in STOP_WORDS)
 
 
-def find_cross_site_matches(runs_with_headlines, threshold=45):
+def find_cross_site_matches(runs_with_headlines, threshold=50):
     """Find headlines covering the same story across different sites.
 
     Uses stop-word removal + minimum shared content words to reduce

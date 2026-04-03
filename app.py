@@ -51,7 +51,7 @@ def _init_db():
 
 @app.route("/")
 def dashboard():
-    threshold = request.args.get("threshold", 45, type=int)
+    threshold = request.args.get("threshold", 50, type=int)
     site_urls = [s["url"] for s in SITES.values()]
     runs_data = get_latest_run_per_site(site_urls)
     url_to_name = {s["url"]: s["name"] for s in SITES.values()}
@@ -270,7 +270,7 @@ def api_runs():
 @app.route("/api/compare")
 @require_api_key
 def api_compare():
-    threshold = request.args.get("threshold", 45, type=int)
+    threshold = request.args.get("threshold", 50, type=int)
     site_urls = [s["url"] for s in SITES.values()]
     runs_data = get_latest_run_per_site(site_urls)
     matches = find_cross_site_matches(runs_data, threshold=threshold)
