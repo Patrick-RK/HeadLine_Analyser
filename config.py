@@ -12,12 +12,12 @@ SITES = {
     },
     "irishtimes": {
         "name": "Irish Times",
-        "url": "https://www.irishtimes.com/",
+        "url": "https://www.irishtimes.com/news/",
         "selector": "h3",
     },
     "independent": {
         "name": "Irish Independent",
-        "url": "https://www.independent.ie/",
+        "url": "https://www.independent.ie/irish-news/",
         "selector": "h2, h4",
     },
     "journal": {
@@ -33,17 +33,17 @@ SITES = {
     },
     "examiner": {
         "name": "Irish Examiner",
-        "url": "https://www.irishexaminer.com/",
+        "url": "https://www.irishexaminer.com/news/",
         "selector": "h5",
     },
     "thesun": {
         "name": "Irish Sun",
-        "url": "https://www.thesun.ie/",
+        "url": "https://www.thesun.ie/news/irish-news/",
         "selector": "h3",
     },
     "extra": {
         "name": "Extra.ie",
-        "url": "https://extra.ie/",
+        "url": "https://extra.ie/news",
         "selector": "h2",
     },
 }
