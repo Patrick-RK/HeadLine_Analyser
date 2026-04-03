@@ -105,3 +105,29 @@ tr.neutral td:last-child  { color: #7f8c8d; font-weight: 600; }
 .flash.success { background: #eafaf1; color: #27ae60; }
 
 a { color: #2980b9; }
+
+/* Compare page */
+.threshold-form {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+.threshold-form label { font-weight: 500; }
+.threshold-form input[type="range"] { width: 180px; }
+
+.match-group {
+    margin-bottom: 2rem;
+}
+.match-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0.8rem;
+    background: #eaf2f8;
+    border-radius: 4px 4px 0 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+.match-group table { margin-bottom: 0; border-radius: 0 0 4px 4px; }
+.site-name { white-space: nowrap; font-weight: 600; color: #2980b9; }

@@ -9,10 +9,12 @@ from config import SITES
 from db import (
     init_db, insert_scrape_run, insert_headlines,
     get_latest_run, get_run, get_headlines_for_run, get_all_runs,
+    get_latest_run_per_site,
 )
 from utilities import (
     fetch_website, strip_html, add_reverse_column,
     headline_analyser, calculate_moving_averages, build_plotly_figure,
+    find_cross_site_matches,
 )
 
 app = Flask(__name__)
@@ -68,6 +70,30 @@ def chart_data_web():
     df = calculate_moving_averages(records)
     fig_json = build_plotly_figure(df)
     return fig_json, 200, {"Content-Type": "application/json"}
+
+
+@app.route("/compare")
+def compare():
+    threshold = request.args.get("threshold", 60, type=int)
+    site_urls = [s["url"] for s in SITES.values()]
+    runs_data = get_latest_run_per_site(site_urls)
+
+    if len(runs_data) < 2:
+        flash("Need scrape data from at least 2 sites to compare. Try 'Scrape All' first.", "error")
+        return redirect(url_for("dashboard"))
+
+    matches = find_cross_site_matches(runs_data, threshold=threshold)
+
+    # Map URLs back to site names for display
+    url_to_name = {s["url"]: s["name"] for s in SITES.values()}
+
+    return render_template(
+        "compare.html",
+        matches=matches,
+        runs=runs_data,
+        url_to_name=url_to_name,
+        threshold=threshold,
+    )
 
 
 @app.route("/history")
@@ -231,6 +257,20 @@ def chart_data():
 def api_runs():
     rows = get_all_runs()
     return jsonify([dict(r) for r in rows])
+
+
+@app.route("/api/compare")
+@require_api_key
+def api_compare():
+    threshold = request.args.get("threshold", 60, type=int)
+    site_urls = [s["url"] for s in SITES.values()]
+    runs_data = get_latest_run_per_site(site_urls)
+    matches = find_cross_site_matches(runs_data, threshold=threshold)
+    url_to_name = {s["url"]: s["name"] for s in SITES.values()}
+    for group in matches:
+        for m in group["matches"]:
+            m["site_name"] = url_to_name.get(m["site"], m["site"])
+    return jsonify({"threshold": threshold, "match_groups": matches})
 
 
 @app.route("/api/runs/<int:run_id>/headlines")

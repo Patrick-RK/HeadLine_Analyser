@@ -87,3 +87,26 @@ def get_all_runs():
     ).fetchall()
     conn.close()
     return rows
+
+
+def get_latest_run_per_site(urls):
+    """Return the most recent run for each URL, with its headlines."""
+    conn = get_db()
+    results = []
+    for url in urls:
+        run = conn.execute(
+            "SELECT * FROM scrape_runs WHERE url = ? ORDER BY scraped_at DESC LIMIT 1",
+            (url,),
+        ).fetchone()
+        if run:
+            headlines = conn.execute(
+                "SELECT * FROM headlines WHERE scrape_run_id = ? ORDER BY position DESC",
+                (run["id"],),
+            ).fetchall()
+            results.append({
+                "run": dict(run),
+                "url": url,
+                "headlines": [dict(h) for h in headlines],
+            })
+    conn.close()
+    return results
