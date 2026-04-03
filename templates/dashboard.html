@@ -65,6 +65,29 @@
     </tbody>
 </table>
 
+<h2>Sentiment by Page Position</h2>
+<p class="run-info">How sentiment shifts as you scroll down each site's front page</p>
+<div class="charts-grid">
+    {% for s in site_stats %}
+    <div class="chart-card">
+        <h3>{{ s.name }}</h3>
+        <div id="chart-{{ loop.index }}" class="site-chart"></div>
+    </div>
+    {% endfor %}
+</div>
+<script>
+    {% for s in site_stats %}
+    fetch("{{ url_for('chart_data_web', site_url=s.url) }}")
+        .then(r => r.json())
+        .then(fig => {
+            fig.layout.margin = {t: 10, b: 40, l: 45, r: 10};
+            fig.layout.height = 280;
+            fig.layout.showlegend = false;
+            Plotly.newPlot('chart-{{ loop.index }}', fig.data, fig.layout, {responsive: true, displayModeBar: false});
+        });
+    {% endfor %}
+</script>
+
 {% if matches %}
 <h2>Shared Stories Across Sites</h2>
 <p class="run-info">{{ matches|length }} stor{{ "y" if matches|length == 1 else "ies" }} covered by multiple outlets</p>
