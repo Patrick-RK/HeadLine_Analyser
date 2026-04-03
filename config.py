@@ -31,4 +31,19 @@ SITES = {
             "roundup-redesign-title",
         ],
     },
+    "examiner": {
+        "name": "Irish Examiner",
+        "url": "https://www.irishexaminer.com/",
+        "selector": "h5",
+    },
+    "thesun": {
+        "name": "Irish Sun",
+        "url": "https://www.thesun.ie/",
+        "selector": "h3",
+    },
+    "extra": {
+        "name": "Extra.ie",
+        "url": "https://extra.ie/",
+        "selector": "h2",
+    },
 }
