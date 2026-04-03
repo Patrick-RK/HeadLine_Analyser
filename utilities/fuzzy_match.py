@@ -13,22 +13,25 @@ STOP_WORDS = frozenset({
     "says", "said", "say", "new", "amid", "set",
 })
 
+MIN_SHARED_WORDS = 3
+
 
 def _strip_stops(text):
     return " ".join(w for w in text.lower().split() if w not in STOP_WORDS)
 
 
-def find_cross_site_matches(runs_with_headlines, threshold=60):
+def find_cross_site_matches(runs_with_headlines, threshold=45):
     """Find headlines covering the same story across different sites.
 
-    Compares headlines with stop words removed for better matching,
-    but preserves original text for display and sentiment scoring.
+    Uses stop-word removal + minimum shared content words to reduce
+    false positives while catching more legitimate overlaps.
     """
     if len(runs_with_headlines) < 2:
         return []
 
     all_headlines = []
     stripped = []
+    word_sets = []
     for run in runs_with_headlines:
         for h in run["headlines"]:
             all_headlines.append({
@@ -37,7 +40,9 @@ def find_cross_site_matches(runs_with_headlines, threshold=60):
                 "compound": h["compound"],
                 "sentiment": h["overall_sentiment"],
             })
-            stripped.append(_strip_stops(h["text"]))
+            s = _strip_stops(h["text"])
+            stripped.append(s)
+            word_sets.append(set(s.split()))
 
     used = set()
     groups = []
@@ -52,6 +57,9 @@ def find_cross_site_matches(runs_with_headlines, threshold=60):
 
         for j, candidate in enumerate(all_headlines):
             if j in used or candidate["site"] in seen_sites:
+                continue
+            # Quick check: must share at least N content words
+            if len(word_sets[i] & word_sets[j]) < MIN_SHARED_WORDS:
                 continue
             score = fuzz.token_sort_ratio(stripped[i], stripped[j])
             if score >= threshold:

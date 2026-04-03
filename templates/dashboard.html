@@ -10,7 +10,7 @@
     </form>
     <form method="GET" class="inline-form threshold-form">
         <label for="threshold">Match threshold:</label>
-        <input type="range" id="threshold" name="threshold" min="40" max="90" value="{{ threshold }}" oninput="this.nextElementSibling.textContent = this.value + '%'">
+        <input type="range" id="threshold" name="threshold" min="30" max="80" value="{{ threshold }}" oninput="this.nextElementSibling.textContent = this.value + '%'">
         <span>{{ threshold }}%</span>
         <button type="submit" class="btn btn-secondary">Update</button>
     </form>
