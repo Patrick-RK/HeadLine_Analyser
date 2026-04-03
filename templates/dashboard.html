@@ -1,58 +1,89 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - Headline Analyser{% endblock %}
+{% block title %}Headline Analyser{% endblock %}
 
 {% block content %}
-<h1>Headline Sentiment Dashboard</h1>
+<h1>Headline Analyser</h1>
 
 <div class="scrape-controls">
-    <form method="POST" action="{{ url_for('scrape_form') }}" class="inline-form">
-        <select name="site">
-            {% for key, site in sites.items() %}
-            <option value="{{ key }}">{{ site.name }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit" class="btn">Scrape</button>
-    </form>
     <form method="POST" action="{{ url_for('scrape_all_form') }}" class="inline-form">
-        <button type="submit" class="btn btn-secondary">Scrape All Sites</button>
+        <button type="submit" class="btn">Scrape All Sites</button>
+    </form>
+    <form method="GET" class="inline-form threshold-form">
+        <label for="threshold">Match threshold:</label>
+        <input type="range" id="threshold" name="threshold" min="40" max="90" value="{{ threshold }}" oninput="this.nextElementSibling.textContent = this.value + '%'">
+        <span>{{ threshold }}%</span>
+        <button type="submit" class="btn btn-secondary">Update</button>
     </form>
 </div>
 
-{% if run %}
-<p class="run-info">
-    Run #{{ run['id'] }} &mdash; {{ run['scraped_at'] }} &mdash; {{ run['url'] }} &mdash; {{ run['headline_count'] }} headlines
-</p>
-
-<div id="chart"></div>
-<script>
-    fetch("{{ url_for('chart_data_web', run_id=run['id']) }}")
-        .then(r => r.json())
-        .then(fig => {
-            Plotly.newPlot('chart', fig.data, fig.layout, {responsive: true});
-        });
-</script>
-
-<table>
+{% if site_stats %}
+<h2>Site Sentiment Overview</h2>
+<table class="site-overview">
     <thead>
         <tr>
-            <th>#</th>
-            <th>Headline</th>
-            <th>Compound</th>
-            <th>Sentiment</th>
+            <th>Source</th>
+            <th>Headlines</th>
+            <th>Avg Compound</th>
+            <th>Positive</th>
+            <th>Negative</th>
+            <th>Neutral</th>
+            <th>Scraped</th>
         </tr>
     </thead>
     <tbody>
-        {% for h in headlines %}
-        <tr class="{{ h['overall_sentiment']|lower }}">
-            <td>{{ h['position'] }}</td>
-            <td>{{ h['text'] }}</td>
-            <td>{{ "%.3f"|format(h['compound']) }}</td>
-            <td>{{ h['overall_sentiment'] }}</td>
+        {% for s in site_stats %}
+        <tr>
+            <td><a href="{{ url_for('site_detail', site_url=s.url) }}">{{ s.name }}</a></td>
+            <td>{{ s.count }}</td>
+            <td class="{{ 'pos-val' if s.avg_compound > 0 else 'neg-val' if s.avg_compound < 0 else '' }}">{{ "%.3f"|format(s.avg_compound) }}</td>
+            <td class="pos-val">{{ s.positive }}</td>
+            <td class="neg-val">{{ s.negative }}</td>
+            <td>{{ s.neutral }}</td>
+            <td class="run-info-cell">{{ s.run.scraped_at[:16] }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+{% if matches %}
+<h2>Shared Stories Across Sites</h2>
+<p class="run-info">{{ matches|length }} stor{{ "y" if matches|length == 1 else "ies" }} covered by multiple outlets</p>
+
+{% for group in matches %}
+<div class="match-group">
+    <div class="match-header">
+        <span class="match-count">{{ group.matches|length }} sites</span>
+        <span class="match-deviation">peak: {{ "%.2f"|format(group.max_deviation) }} | spread: {{ "%.2f"|format(group.spread) }}</span>
+        <span class="match-score">{{ group.score }}% match</span>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Source</th>
+                <th>Headline</th>
+                <th>Compound</th>
+                <th>Sentiment</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in group.matches %}
+            <tr class="{{ m.sentiment|lower }}">
+                <td class="site-name">{{ url_to_name.get(m.site, m.site) }}</td>
+                <td>{{ m.text }}</td>
+                <td>{{ "%.3f"|format(m.compound) }}</td>
+                <td>{{ m.sentiment }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endfor %}
+
 {% else %}
-<p>No scrape data yet. Pick a site and click <strong>Scrape</strong> to get started.</p>
+<p>No matching headlines found at {{ threshold }}% threshold. Try lowering the threshold.</p>
+{% endif %}
+
+{% else %}
+<p>No scrape data yet. Click <strong>Scrape All Sites</strong> to get started.</p>
 {% endif %}
 {% endblock %}

@@ -57,14 +57,21 @@ def find_cross_site_matches(runs_with_headlines, threshold=60):
 
         # Only keep groups that span 2+ sites
         if len(group) >= 2:
+            compounds = [m["compound"] for m in group]
+            max_deviation = max(abs(c) for c in compounds)
+            spread = max(compounds) - min(compounds)
             groups.append({
                 "anchor": anchor["text"],
                 "score": max(
                     fuzz.token_sort_ratio(anchor["text"], m["text"])
                     for m in group[1:]
                 ),
+                "max_deviation": max_deviation,
+                "spread": spread,
                 "matches": group,
             })
 
-    groups.sort(key=lambda g: (-len(g["matches"]), -g["score"]))
+    # Most extreme language first (biggest deviation from neutral),
+    # then biggest spread between sites
+    groups.sort(key=lambda g: (-g["max_deviation"], -g["spread"]))
     return groups

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ site_name }} - Headline Analyser{% endblock %}
+
+{% block content %}
+<h1>{{ site_name }}</h1>
+<p class="run-info">
+    Run #{{ run.id }} &mdash; {{ run.scraped_at }} &mdash; {{ run.headline_count }} headlines
+</p>
+
+<div id="chart"></div>
+<script>
+    fetch("{{ url_for('chart_data_web', site_url=run.url) }}")
+        .then(r => r.json())
+        .then(fig => {
+            Plotly.newPlot('chart', fig.data, fig.layout, {responsive: true});
+        });
+</script>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Headline</th>
+            <th>Compound</th>
+            <th>Sentiment</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for h in headlines %}
+        <tr class="{{ h.overall_sentiment|lower }}">
+            <td>{{ h.position }}</td>
+            <td>{{ h.text }}</td>
+            <td>{{ "%.3f"|format(h.compound) }}</td>
+            <td>{{ h.overall_sentiment }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
