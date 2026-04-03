@@ -133,6 +133,48 @@ a { color: #2980b9; }
 .site-name { white-space: nowrap; font-weight: 600; color: #2980b9; }
 
 h2 { margin: 1.5rem 0 0.8rem; }
+
+/* Leaderboard */
+.leaderboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+.leader {
+    background: #fff;
+    border-radius: 6px;
+    padding: 1.2rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-top: 4px solid #bdc3c7;
+}
+.leader-positive { border-top-color: #27ae60; }
+.leader-neutral  { border-top-color: #7f8c8d; }
+.leader-negative { border-top-color: #c0392b; }
+.leader-label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #999;
+    margin-bottom: 0.3rem;
+}
+.leader-name {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+.leader-score {
+    display: block;
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+    font-weight: 600;
+}
+.leader-positive .leader-score { color: #27ae60; }
+.leader-neutral  .leader-score { color: #7f8c8d; }
+.leader-negative .leader-score { color: #c0392b; }
 .pos-val { color: #27ae60; font-weight: 600; }
 .neg-val { color: #c0392b; font-weight: 600; }
 .run-info-cell { color: #999; font-size: 0.85rem; }

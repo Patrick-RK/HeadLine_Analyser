@@ -79,6 +79,13 @@ def dashboard():
 
     matches = find_cross_site_matches(runs_data, threshold=threshold) if len(runs_data) >= 2 else []
 
+    # Leaderboard — most positive, most negative, most neutral
+    leaders = {}
+    if site_stats:
+        leaders["positive"] = max(site_stats, key=lambda s: s["avg_compound"])
+        leaders["negative"] = min(site_stats, key=lambda s: s["avg_compound"])
+        leaders["neutral"] = min(site_stats, key=lambda s: abs(s["avg_compound"]))
+
     return render_template(
         "dashboard.html",
         site_stats=site_stats,
@@ -86,6 +93,7 @@ def dashboard():
         url_to_name=url_to_name,
         threshold=threshold,
         sites=SITES,
+        leaders=leaders,
     )
 
 

@@ -16,6 +16,26 @@
     </form>
 </div>
 
+{% if leaders %}
+<div class="leaderboard">
+    <div class="leader leader-positive">
+        <span class="leader-label">Most Positive</span>
+        <span class="leader-name">{{ leaders.positive.name }}</span>
+        <span class="leader-score">{{ "%.3f"|format(leaders.positive.avg_compound) }}</span>
+    </div>
+    <div class="leader leader-neutral">
+        <span class="leader-label">Most Neutral</span>
+        <span class="leader-name">{{ leaders.neutral.name }}</span>
+        <span class="leader-score">{{ "%.3f"|format(leaders.neutral.avg_compound) }}</span>
+    </div>
+    <div class="leader leader-negative">
+        <span class="leader-label">Most Negative</span>
+        <span class="leader-name">{{ leaders.negative.name }}</span>
+        <span class="leader-score">{{ "%.3f"|format(leaders.negative.avg_compound) }}</span>
+    </div>
+</div>
+{% endif %}
+
 {% if site_stats %}
 <h2>Site Sentiment Overview</h2>
 <table class="site-overview">
