@@ -1,0 +1,11 @@
+myenv/
+__pycache__/
+*.pyc
+*.pyo
+.git/
+.gitignore
+headlines.db
+graphs/
+*.ipynb
+get-pip.py
+.claude/

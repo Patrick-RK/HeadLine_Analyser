@@ -1,7 +1,8 @@
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE = os.path.join(BASE_DIR, "headlines.db")
+DATA_DIR = os.environ.get("DATA_DIR", BASE_DIR)
+DATABASE = os.path.join(DATA_DIR, "headlines.db")
 
 SITES = {
     "rte": {

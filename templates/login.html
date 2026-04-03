@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Log In - Headline Analyser{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <h1>Log In</h1>
+    <form method="POST">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autofocus>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit" class="btn btn-block">Log In</button>
+    </form>
+    <p class="auth-link">Don't have an account? <a href="{{ url_for('register') }}">Register</a></p>
+</div>
+{% endblock %}

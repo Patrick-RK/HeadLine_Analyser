@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from config import DATABASE
 
@@ -11,9 +12,40 @@ def get_db():
 
 def init_db():
     conn = get_db()
-    with open("schema.sql") as f:
+    schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "schema.sql")
+    with open(schema_path) as f:
         conn.executescript(f.read())
     conn.close()
+
+
+# ── User helpers ──────────────────────────────────────────────
+
+def create_user(username, password_hash):
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO users (username, password_hash) VALUES (?, ?)",
+        (username, password_hash),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_user_by_username(username):
+    conn = get_db()
+    row = conn.execute(
+        "SELECT * FROM users WHERE username = ?", (username,)
+    ).fetchone()
+    conn.close()
+    return row
+
+
+def get_user_by_id(user_id):
+    conn = get_db()
+    row = conn.execute(
+        "SELECT * FROM users WHERE id = ?", (user_id,)
+    ).fetchone()
+    conn.close()
+    return row
 
 
 def insert_scrape_run(url, headline_count):
