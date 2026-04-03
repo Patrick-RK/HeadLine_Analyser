@@ -18,36 +18,6 @@ def init_db():
     conn.close()
 
 
-# ── User helpers ──────────────────────────────────────────────
-
-def create_user(username, password_hash):
-    conn = get_db()
-    conn.execute(
-        "INSERT INTO users (username, password_hash) VALUES (?, ?)",
-        (username, password_hash),
-    )
-    conn.commit()
-    conn.close()
-
-
-def get_user_by_username(username):
-    conn = get_db()
-    row = conn.execute(
-        "SELECT * FROM users WHERE username = ?", (username,)
-    ).fetchone()
-    conn.close()
-    return row
-
-
-def get_user_by_id(user_id):
-    conn = get_db()
-    row = conn.execute(
-        "SELECT * FROM users WHERE id = ?", (user_id,)
-    ).fetchone()
-    conn.close()
-    return row
-
-
 def insert_scrape_run(url, headline_count):
     conn = get_db()
     cur = conn.execute(

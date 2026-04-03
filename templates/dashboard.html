@@ -5,7 +5,7 @@
 <h1>Headline Sentiment Dashboard</h1>
 
 <div class="scrape-controls">
-    <form method="POST" action="{{ url_for('scrape') }}" class="inline-form">
+    <form method="POST" action="{{ url_for('scrape_form') }}" class="inline-form">
         <select name="site">
             {% for key, site in sites.items() %}
             <option value="{{ key }}">{{ site.name }}</option>
@@ -13,7 +13,7 @@
         </select>
         <button type="submit" class="btn">Scrape</button>
     </form>
-    <form method="POST" action="{{ url_for('scrape_all') }}" class="inline-form">
+    <form method="POST" action="{{ url_for('scrape_all_form') }}" class="inline-form">
         <button type="submit" class="btn btn-secondary">Scrape All Sites</button>
     </form>
 </div>
@@ -25,7 +25,7 @@
 
 <div id="chart"></div>
 <script>
-    fetch("{{ url_for('chart_data', run_id=run['id']) }}")
+    fetch("{{ url_for('chart_data_web', run_id=run['id']) }}")
         .then(r => r.json())
         .then(fig => {
             Plotly.newPlot('chart', fig.data, fig.layout, {responsive: true});

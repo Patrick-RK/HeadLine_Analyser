@@ -105,29 +105,3 @@ tr.neutral td:last-child  { color: #7f8c8d; font-weight: 600; }
 .flash.success { background: #eafaf1; color: #27ae60; }
 
 a { color: #2980b9; }
-
-/* Auth pages */
-.auth-card {
-    max-width: 400px;
-    margin: 4rem auto;
-    background: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-.auth-card h1 { text-align: center; margin-bottom: 1.5rem; }
-.auth-card label { display: block; margin-bottom: 0.3rem; font-weight: 500; }
-.auth-card input[type="text"],
-.auth-card input[type="password"] {
-    width: 100%;
-    padding: 0.6rem 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-    margin-bottom: 1rem;
-}
-.btn-block { width: 100%; }
-.auth-link { text-align: center; margin-top: 1rem; font-size: 0.9rem; }
-
-.nav-spacer { flex: 1; }
-.nav-user { color: #95a5a6; font-size: 0.9rem; }
