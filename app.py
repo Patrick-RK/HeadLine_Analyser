@@ -86,6 +86,41 @@ def dashboard():
         leaders["negative"] = min(site_stats, key=lambda s: s["avg_compound"])
         leaders["neutral"] = min(site_stats, key=lambda s: abs(s["avg_compound"]))
 
+    # Bias pairs — which two sites disagree most on shared stories?
+    from collections import defaultdict
+    pair_diffs = defaultdict(list)  # (site_a, site_b) -> [abs differences]
+    pair_examples = defaultdict(list)  # (site_a, site_b) -> [(story, a_compound, b_compound)]
+    for group in matches:
+        m_list = group["matches"]
+        for a_idx in range(len(m_list)):
+            for b_idx in range(a_idx + 1, len(m_list)):
+                a, b = m_list[a_idx], m_list[b_idx]
+                name_a = url_to_name.get(a["site"], a["site"])
+                name_b = url_to_name.get(b["site"], b["site"])
+                key = tuple(sorted([name_a, name_b]))
+                diff = abs(a["compound"] - b["compound"])
+                pair_diffs[key].append(diff)
+                pair_examples[key].append({
+                    "anchor": group["anchor"],
+                    "site_a": name_a, "compound_a": a["compound"], "text_a": a["text"],
+                    "site_b": name_b, "compound_b": b["compound"], "text_b": b["text"],
+                    "diff": diff,
+                })
+
+    bias_pairs = []
+    for pair, diffs in pair_diffs.items():
+        avg_diff = sum(diffs) / len(diffs)
+        examples = sorted(pair_examples[pair], key=lambda e: -e["diff"])
+        bias_pairs.append({
+            "site_a": pair[0],
+            "site_b": pair[1],
+            "avg_diff": avg_diff,
+            "story_count": len(diffs),
+            "worst": examples[0] if examples else None,
+            "examples": examples[:3],
+        })
+    bias_pairs.sort(key=lambda p: -p["avg_diff"])
+
     return render_template(
         "dashboard.html",
         site_stats=site_stats,
@@ -94,6 +129,7 @@ def dashboard():
         threshold=threshold,
         sites=SITES,
         leaders=leaders,
+        bias_pairs=bias_pairs,
     )
 
 

@@ -88,6 +88,41 @@
     {% endfor %}
 </script>
 
+{% if bias_pairs %}
+<h2>Bias Pairs</h2>
+<p class="run-info">Which two outlets disagree most when covering the same story?</p>
+<div class="bias-pairs">
+    {% for bp in bias_pairs[:5] %}
+    <div class="bias-card {{ 'bias-top' if loop.index == 1 else '' }}">
+        <div class="bias-vs">
+            <span class="bias-site">{{ bp.site_a }}</span>
+            <span class="bias-label">vs</span>
+            <span class="bias-site">{{ bp.site_b }}</span>
+        </div>
+        <div class="bias-stats">
+            <span class="bias-avg">avg disagreement: <strong>{{ "%.2f"|format(bp.avg_diff) }}</strong></span>
+            <span class="bias-count">across {{ bp.story_count }} shared stor{{ "y" if bp.story_count == 1 else "ies" }}</span>
+        </div>
+        {% if bp.worst %}
+        <div class="bias-example">
+            <div class="bias-example-label">Biggest split:</div>
+            <div class="bias-example-row">
+                <span class="site-name">{{ bp.worst.site_a }}</span>
+                <span class="{{ 'pos-val' if bp.worst.compound_a > 0 else 'neg-val' if bp.worst.compound_a < 0 else '' }}">{{ "%+.3f"|format(bp.worst.compound_a) }}</span>
+                <span class="bias-headline">{{ bp.worst.text_a[:80] }}</span>
+            </div>
+            <div class="bias-example-row">
+                <span class="site-name">{{ bp.worst.site_b }}</span>
+                <span class="{{ 'pos-val' if bp.worst.compound_b > 0 else 'neg-val' if bp.worst.compound_b < 0 else '' }}">{{ "%+.3f"|format(bp.worst.compound_b) }}</span>
+                <span class="bias-headline">{{ bp.worst.text_b[:80] }}</span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 {% if matches %}
 <h2>Shared Stories Across Sites</h2>
 <p class="run-info">{{ matches|length }} stor{{ "y" if matches|length == 1 else "ies" }} covered by multiple outlets</p>
