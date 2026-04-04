@@ -19,9 +19,8 @@ CREATE TABLE IF NOT EXISTS headlines (
     roberta_sentiment TEXT,
     siebert_score REAL,
     siebert_sentiment TEXT,
-    newssent_pos REAL,
-    newssent_neg REAL,
-    newssent_sentiment TEXT,
+    gpt_score REAL,
+    gpt_sentiment TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -65,6 +65,34 @@ def _run_siebert(texts):
     return out
 
 
+def _run_gpt(texts):
+    """Run GPT/Claude API sentiment analysis.
+
+    TODO: Drop in API key via GPT_API_KEY env var and uncomment the
+    implementation below.  The function should return a list of dicts
+    with 'score' (float, -1 to 1) and 'sentiment' (Positive/Negative/Neutral).
+    """
+    # import os, json, requests
+    # api_key = os.environ.get("GPT_API_KEY")
+    # if not api_key:
+    #     return [{"score": None, "sentiment": None}] * len(texts)
+    #
+    # prompt = (
+    #     "Rate the sentiment of each headline below as a JSON array. "
+    #     "Each entry should have 'score' (-1.0 to 1.0) and 'sentiment' "
+    #     "(Positive, Negative, or Neutral).\n\n"
+    #     + "\n".join(f"{i+1}. {t}" for i, t in enumerate(texts))
+    # )
+    # resp = requests.post(
+    #     "https://api.openai.com/v1/chat/completions",
+    #     headers={"Authorization": f"Bearer {api_key}"},
+    #     json={"model": "gpt-4o-mini", "messages": [{"role": "user", "content": prompt}]},
+    # )
+    # return json.loads(resp.json()["choices"][0]["message"]["content"])
+
+    return [{"score": None, "sentiment": None}] * len(texts)
+
+
 
 def headline_analyser(headlines):
     """
@@ -82,6 +110,7 @@ def headline_analyser(headlines):
     # Run all models
     roberta_results = _run_roberta(texts)
     siebert_results = _run_siebert(texts)
+    gpt_results = _run_gpt(texts)
 
     results = []
     for i, headline_data in enumerate(headlines):
@@ -108,6 +137,9 @@ def headline_analyser(headlines):
             # SiEBERT
             "siebert_score": siebert_results[i]["score"],
             "siebert_sentiment": siebert_results[i]["sentiment"],
+            # GPT (placeholder until API key is set)
+            "gpt_score": gpt_results[i]["score"],
+            "gpt_sentiment": gpt_results[i]["sentiment"],
         })
 
     return results

@@ -20,7 +20,7 @@ def init_db():
     for col, typ in [
         ("roberta_score", "REAL"), ("roberta_sentiment", "TEXT"),
         ("siebert_score", "REAL"), ("siebert_sentiment", "TEXT"),
-        ("newssent_pos", "REAL"), ("newssent_neg", "REAL"), ("newssent_sentiment", "TEXT"),
+        ("gpt_score", "REAL"), ("gpt_sentiment", "TEXT"),
     ]:
         if col not in existing:
             conn.execute(f"ALTER TABLE headlines ADD COLUMN {col} {typ}")
@@ -46,8 +46,8 @@ def insert_headlines(run_id, results):
         """INSERT INTO headlines
            (scrape_run_id, text, position, compound, neg, neu, pos, overall_sentiment,
             roberta_score, roberta_sentiment, siebert_score, siebert_sentiment,
-            newssent_pos, newssent_neg, newssent_sentiment)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            gpt_score, gpt_sentiment)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         [
             (
                 run_id,
@@ -62,9 +62,8 @@ def insert_headlines(run_id, results):
                 r.get("roberta_sentiment"),
                 r.get("siebert_score"),
                 r.get("siebert_sentiment"),
-                r.get("newssent_pos"),
-                r.get("newssent_neg"),
-                r.get("newssent_sentiment"),
+                r.get("gpt_score"),
+                r.get("gpt_sentiment"),
             )
             for r in results
         ],
