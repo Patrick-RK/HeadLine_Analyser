@@ -16,24 +16,34 @@
         });
 </script>
 
+<div class="table-scroll">
 <table>
     <thead>
         <tr>
             <th>#</th>
             <th>Headline</th>
-            <th>Compound</th>
-            <th>Sentiment</th>
+            <th>VADER</th>
+            <th>RoBERTa</th>
+            <th>SiEBERT</th>
         </tr>
     </thead>
     <tbody>
         {% for h in headlines %}
-        <tr class="{{ h.overall_sentiment|lower }}">
+        <tr>
             <td>{{ h.position }}</td>
             <td>{{ h.text }}</td>
-            <td>{{ "%.3f"|format(h.compound) }}</td>
-            <td>{{ h.overall_sentiment }}</td>
+            <td class="{{ 'pos-val' if h.compound > 0 else 'neg-val' if h.compound < 0 else '' }}">
+                {{ "%.2f"|format(h.compound) }}
+            </td>
+            <td class="{{ 'pos-val' if h.roberta_score is not none and h.roberta_score > 0 else 'neg-val' if h.roberta_score is not none and h.roberta_score < 0 else '' }}">
+                {{ "%.2f"|format(h.roberta_score) if h.roberta_score is not none else '—' }}
+            </td>
+            <td class="{{ 'pos-val' if h.siebert_score is not none and h.siebert_score > 0 else 'neg-val' if h.siebert_score is not none and h.siebert_score < 0 else '' }}">
+                {{ "%.2f"|format(h.siebert_score) if h.siebert_score is not none else '—' }}
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% endblock %}

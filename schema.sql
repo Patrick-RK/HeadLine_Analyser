@@ -15,6 +15,13 @@ CREATE TABLE IF NOT EXISTS headlines (
     neu REAL NOT NULL,
     pos REAL NOT NULL,
     overall_sentiment TEXT NOT NULL,
+    roberta_score REAL,
+    roberta_sentiment TEXT,
+    siebert_score REAL,
+    siebert_sentiment TEXT,
+    newssent_pos REAL,
+    newssent_neg REAL,
+    newssent_sentiment TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -15,6 +15,16 @@ def init_db():
     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "schema.sql")
     with open(schema_path) as f:
         conn.executescript(f.read())
+    # Migrate existing DBs — add new model columns if missing
+    existing = {row[1] for row in conn.execute("PRAGMA table_info(headlines)").fetchall()}
+    for col, typ in [
+        ("roberta_score", "REAL"), ("roberta_sentiment", "TEXT"),
+        ("siebert_score", "REAL"), ("siebert_sentiment", "TEXT"),
+        ("newssent_pos", "REAL"), ("newssent_neg", "REAL"), ("newssent_sentiment", "TEXT"),
+    ]:
+        if col not in existing:
+            conn.execute(f"ALTER TABLE headlines ADD COLUMN {col} {typ}")
+    conn.commit()
     conn.close()
 
 
@@ -34,8 +44,10 @@ def insert_headlines(run_id, results):
     conn = get_db()
     conn.executemany(
         """INSERT INTO headlines
-           (scrape_run_id, text, position, compound, neg, neu, pos, overall_sentiment)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+           (scrape_run_id, text, position, compound, neg, neu, pos, overall_sentiment,
+            roberta_score, roberta_sentiment, siebert_score, siebert_sentiment,
+            newssent_pos, newssent_neg, newssent_sentiment)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         [
             (
                 run_id,
@@ -46,6 +58,13 @@ def insert_headlines(run_id, results):
                 r["neu"],
                 r["pos"],
                 r["overall_sentiment"],
+                r.get("roberta_score"),
+                r.get("roberta_sentiment"),
+                r.get("siebert_score"),
+                r.get("siebert_sentiment"),
+                r.get("newssent_pos"),
+                r.get("newssent_neg"),
+                r.get("newssent_sentiment"),
             )
             for r in results
         ],
