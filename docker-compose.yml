@@ -7,6 +7,7 @@ services:
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
       - API_KEY=${API_KEY:?Set API_KEY in .env}
       - DATA_DIR=/app/data
+      - SCRAPE_HOUR=${SCRAPE_HOUR:-8}
     volumes:
       - db-data:/app/data
     restart: unless-stopped

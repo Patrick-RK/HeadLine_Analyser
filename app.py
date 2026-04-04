@@ -9,7 +9,7 @@ from config import SITES
 from db import (
     init_db, insert_scrape_run, insert_headlines,
     get_latest_run, get_run, get_headlines_for_run, get_all_runs,
-    get_latest_run_per_site,
+    get_latest_run_per_site, get_daily_sentiment,
 )
 from utilities import (
     fetch_website, strip_html, add_reverse_column,
@@ -21,6 +21,43 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "headline-analyser-dev-key")
 
 API_KEY = os.environ.get("API_KEY", secrets.token_urlsafe(32))
+SCRAPE_HOUR = int(os.environ.get("SCRAPE_HOUR", "8"))
+
+
+# ── Scheduled daily scrape ────────────────────────────────────
+
+def _scrape_all_sites():
+    """Background job: scrape every configured site."""
+    with app.app_context():
+        init_db()
+        for site in SITES.values():
+            try:
+                html = fetch_website(site["url"])
+                titles = strip_html(
+                    html,
+                    selector=site["selector"],
+                    exclude_classes=site.get("exclude_classes"),
+                )
+                indexed = add_reverse_column(titles)
+                if len(indexed) < 5:
+                    continue
+                results = headline_analyser(indexed)
+                run_id = insert_scrape_run(site["url"], len(results))
+                insert_headlines(run_id, results)
+            except Exception:
+                pass
+
+
+def _start_scheduler():
+    from apscheduler.schedulers.background import BackgroundScheduler
+    scheduler = BackgroundScheduler(daemon=True)
+    scheduler.add_job(_scrape_all_sites, "cron", hour=SCRAPE_HOUR, minute=0, id="daily_scrape")
+    scheduler.start()
+
+
+# Start scheduler once — skip in Flask reloader child process
+if not os.environ.get("WERKZEUG_RUN_MAIN"):
+    _start_scheduler()
 
 
 # ── API key auth ──────────────────────────────────────────────
@@ -170,6 +207,59 @@ def chart_data_web():
     df = calculate_moving_averages(records)
     fig_json = build_plotly_figure(df)
     return fig_json, 200, {"Content-Type": "application/json"}
+
+
+@app.route("/trends")
+def trends():
+    url_to_name = {s["url"]: s["name"] for s in SITES.values()}
+    return render_template("trends.html", sites=SITES, url_to_name=url_to_name)
+
+
+@app.route("/trends-data")
+def trends_data():
+    import plotly.graph_objects as go
+    site_urls = [s["url"] for s in SITES.values()]
+    url_to_name = {s["url"]: s["name"] for s in SITES.values()}
+    rows = get_daily_sentiment(site_urls)
+
+    # Group by site
+    from collections import defaultdict
+    by_site = defaultdict(lambda: {"days": [], "compounds": [], "counts": []})
+    for r in rows:
+        name = url_to_name.get(r["url"], r["url"])
+        by_site[name]["days"].append(r["day"])
+        by_site[name]["compounds"].append(r["avg_compound"])
+        by_site[name]["counts"].append(r["headline_count"])
+
+    colours = [
+        "#2980b9", "#c0392b", "#27ae60", "#8e44ad",
+        "#d35400", "#2c3e50", "#16a085",
+    ]
+    fig = go.Figure()
+    for i, (name, data) in enumerate(by_site.items()):
+        fig.add_trace(go.Scatter(
+            x=data["days"],
+            y=data["compounds"],
+            mode="lines+markers",
+            name=name,
+            line=dict(color=colours[i % len(colours)], width=2),
+            marker=dict(size=6),
+            hovertemplate=f"<b>{name}</b><br>%{{x}}<br>avg: %{{y:.3f}}<br>headlines: %{{customdata}}<extra></extra>",
+            customdata=data["counts"],
+        ))
+
+    fig.add_hline(y=0, line_dash="dot", line_color="#999", opacity=0.5)
+
+    fig.update_layout(
+        xaxis_title="Date",
+        yaxis_title="Avg Sentiment",
+        template="plotly_white",
+        hovermode="x unified",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+        margin=dict(t=40, b=40, l=50, r=20),
+    )
+
+    return fig.to_json(), 200, {"Content-Type": "application/json"}
 
 
 @app.route("/history")

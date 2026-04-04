@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Trends - Headline Analyser{% endblock %}
+
+{% block content %}
+<h1>Sentiment Over Time</h1>
+<p class="run-info">Daily average sentiment per site. Scrapes run automatically every day.</p>
+
+<div id="trends-chart" style="width:100%; min-height:500px;"></div>
+<script>
+    fetch("{{ url_for('trends_data') }}")
+        .then(r => r.json())
+        .then(fig => {
+            Plotly.newPlot('trends-chart', fig.data, fig.layout, {responsive: true});
+        });
+</script>
+{% endblock %}

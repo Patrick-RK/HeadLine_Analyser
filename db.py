@@ -89,6 +89,25 @@ def get_all_runs():
     return rows
 
 
+def get_daily_sentiment(urls):
+    """Return avg compound per site per day for the trends chart."""
+    conn = get_db()
+    placeholders = ",".join("?" for _ in urls)
+    rows = conn.execute(
+        f"""SELECT date(r.scraped_at) AS day, r.url,
+                   AVG(h.compound) AS avg_compound,
+                   COUNT(h.id) AS headline_count
+            FROM scrape_runs r
+            JOIN headlines h ON h.scrape_run_id = r.id
+            WHERE r.url IN ({placeholders})
+            GROUP BY day, r.url
+            ORDER BY day""",
+        urls,
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
 def get_latest_run_per_site(urls):
     """Return the most recent run for each URL, with its headlines."""
     conn = get_db()
